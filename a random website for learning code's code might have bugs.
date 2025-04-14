@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeBites:learn to code</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #333;
+            color: rgb(255, 255, 255);
+            padding: 1rem;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #language-selector {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        #language-selector select {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+
+        #language-selector select option {
+            display: flex;
+            align-items: center;
+        }
+
+        #language-selector select option img {
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        #lesson-container {
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .lesson {
+            margin-bottom: 1.5rem;
+        }
+
+        .lesson-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .code-example {
+            background-color: #f0f0f0;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .interactive-editor {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #ccc;
+            margin-bottom: 1rem;
+        }
+
+        .run-button {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .output {
+            border: 1px solid #ddd;
+            padding: 1rem;
+            margin-top: 1rem;
+            background-color: #f9f9f9;
+        }
+
+        .quiz-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .quiz-question {
+            margin-bottom: 10px;
+        }
+
+        .correct {
+            background-color: rgb(0, 249, 0);
+            animation: pulse 1s ease-in-out;
+        }
+
+        .incorrect {
+            background-color: rgb(253, 0, 0);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+
+        .hint {
+            background-color: lightyellow;
+            padding: 5px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .animate-hint {
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>CodeBites: Learn to Code</h1>
+    </header>
+    <main>
+        <div id="language-selector">
+            <select id="language" onchange="loadLessons()">
+                <option value="javascript"><img src="javascript_icon.png" alt="JavaScript" height="20" width="20" style="margin-right: 5px; vertical-align: middle;"> JavaScript</option>
+                <option value="python"><img src="python_icon.png" alt="Python" height="20" width="20" style="margin-right: 5px; vertical-align: middle;"> Python</option>
+                <option value="html"><img src="html_icon.png" alt="HTML" height="20" width="20" style="margin-right: 5px; vertical-align: middle;"> HTML</option>
+                <option value="css"><img src="css_icon.png" alt="CSS" height="20" width="20" style="margin-right: 5px; vertical-align: middle;"> CSS</option>
+            </select>
+        </div>
+        <img src="javascript_icon.png" alt="JavaScript" height="200" width="200" style="display: none;">
+        <div id="lesson-container">
+        </div>
+        <div id="score-container" style="display: none;">
+            <h2>Your Score: <span id="final-score"></span></h2>
+            <p id="next-steps"></p>
+        </div>
+    </main>
+
+    <script>
+        const lessons = {
+            javascript: [
+                {
+                    title: "Introduction to JavaScript",
+                    content: `
+                        <p>Here's a simple JavaScript example:</p>
+                        <div class="code-example">
+                            console.log("Hello, World!");
+                        </div>
+                        <textarea class="interactive-editor" id="code1"></textarea>
+                        <button class="run-button" onclick="runCode('code1', 'output1')">Run</button>
+                        <div id="output1" class="output"></div>
+                    `,
+                    quiz: [
+                        {
+                            question: "What does console.log() do?",
+                            options: ["Prints to the console", "Creates a variable", "Defines a function", "None of the above"],
+                            answer: "Prints to the console",
+                            hint: "Think about where you see output in a browser's developer tools."
+                        },
+                        {
+                            question: "Which keyword is commonly used to declare a variable in JavaScript?",
+                            options: ["variable", "var, let, const", "define", "None of the above"],
+                            answer: "var, let, const",
+                            hint: "Variables are used to store data, and there are multiple ways to declare them."
+                        }
+                    ]
+                },
+            ],
+            python: [
+                {
+                    title: "Introduction to Python",
+                    content: `
+                        <p>Here's a simple Python example:</p>
+                        <div class="code-example">
+                            print("Hello, World!")
+                        </div>
+                        <textarea class="interactive-editor" id="codePython1"></textarea>
+                        <button class="run-button" onclick="runPythonCode('codePython1', 'outputPython1')">Run</button>
+                        <div id="outputPython1" class="output"></div>
+                    `,
+                    quiz: [
+                        {
+                            question: "What does print() function do in Python?",
+                            options: ["Prints to the console", "Creates a variable", "Defines a function", "None of the above"],
+                            answer: "Prints to the console",
+                            hint: "The print() function is used to display output."
+                        },
+                        {
+                            question: "Which keyword is used to declare a variable in Python?",
+                            options: ["variable", "var", "let", "None of the above"],
+                            answer: "None of the above",
+                            hint: "Python variables are declared implicitly."
+                        }
+                    ]
+                }
+            ],
+            html: [
+                {
+                    title: "Introduction to HTML",
+                    content: `
+                        <p>Here's a simple HTML example:</p>
+                        <div class="code-example">
+                            &lt;h1&gt;Hello, HTML!&lt;/h1&gt;
+                        </div>
+                        <textarea class="interactive-editor" id="codeHTML1">&lt;h1&gt;Hello, HTML!&lt;/h1&gt;</textarea>
+                        <button class="run-button" onclick="runHtmlCode('codeHTML1', 'outputHTML1')">Run</button>
+                        <div id="outputHTML1" class="output"></div>
+                    `,
+                    quiz: [
+                        {
+                            question: "What does &lt;h1&gt; tag do in HTML?",
+                            options: ["Defines a hyperlink", "Defines a paragraph", "Defines a heading", "None of the above"],
+                            answer: "Defines a heading",
+                            hint: "h1 tags define the main heading."
+                        },
+                        {
+                            question: "Which tag is used to create a paragraph in HTML?",
+                            options: ["&lt;p&gt;", "&lt;h1&gt;", "&lt;div&gt;", "&lt;span&gt;"],
+                            answer: "&lt;p&gt;",
+                            hint: "Paragraphs use the p tag."
+                        }
+                    ]
+                }
+            ],
+            css:[
+                {
+                    title: "Introduction to CSS",
+                    content:`
+                        <p>simple css example:</p>
+                        <div class = "code-example">
+                            p {color:red;}
+                        </div>
+                        <textarea class= "interactive-editor" id = "codeCSS1"> p {color:red;}</textarea>
+                        <button class="run-button" onclick = "runCSSCode('codeCSS1','outputCSS1')">Run</button>
+                        <div id = "outputCSS1" class = "output"></div>
+                    `,
+                    quiz: [
+                        {
+                            question: "What is CSS used for?",
+                            options: ["Programming logic", "Styling web pages", "Database management", "Server-side scripting"],
+                            answer: "Styling web pages",
+                            hint: "CSS is all about how things look."
+                        },
+                        {
+                            question: "Which CSS property is used to change the text color?",
+                            options: ["background-color", "font-size", "color", "text-align"],
+                            answer: "color",
+                            hint: "Color is the direct property."
+                        }
+                    ]
+                }
+            ]
+        };
+
+        let score = 0;
+        let totalQuestions = 0;
+
+        function loadLessons() {
+            const language = document.getElementById("language").value;
+            const lessonContainer = document.getElementById("lesson-container");
+            lessonContainer.innerHTML = "";
+            score = 0;
+            totalQuestions = 0;
+
+            if (lessons[language]) {
+                lessons[language].forEach((lesson, index) => {
+                    const lessonDiv = document.createElement("div");
+                    lessonDiv.classList.add("lesson");
+                    lessonDiv.innerHTML = `<div class="lesson-title">${lesson.title}</div>${lesson.content}`;
+
+                    if (lesson.quiz && lesson.quiz.length > 0) {
+                        const quizDiv = document.createElement("div");
+                        quizDiv.classList.add("quiz-container");
+                        lesson.quiz.forEach((quiz, quizIndex) => {
+                            totalQuestions++;
+                            const questionDiv = document.createElement("div");
+                            questionDiv.classList.add("quiz-question");
+                            questionDiv.innerHTML = `<p>${quiz.question}</p>`;
+                            quiz.options.forEach(option => {
+                                questionDiv.innerHTML += `<label><input type="radio" name="q${index}-${quizIndex}" value="${option}">${option}</label><br>`;
+                            });
+                            questionDiv.innerHTML += `<button onclick="checkAnswer('${language}', ${index}, ${quizIndex})">Check Answer</button>`;
+                            questionDiv.innerHTML += `<button onclick="showHint(this.parentElement)">Hint</button><div class="hint">${quiz.hint}</div>`
+                            quizDiv.appendChild(questionDiv);
+                        });
+                        lessonDiv.appendChild(quizDiv);
+                    }
+
+                    lessonContainer.appendChild(lessonDiv);
+                });
+            } else {
+                lessonContainer.innerHTML = `<p>Lessons for ${language} are coming soon!</p>`;
+            }
+            document.getElementById("score-container").style.display = "none";
+        }
+        function showHint(questionDiv){
+            questionDiv.querySelector(".hint").style.display = "block";
+            questionDiv.querySelector(".hint").classList.add("animate-hint")
+            new Audio('hint.wav').play();
+        }
+
+        function checkAnswer(language, lessonIndex, quizIndex) {
+            const selectedOption = document.querySelector(`input[name="q${lessonIndex}-${quizIndex}"]:checked`);
+            const correctAnswer = lessons[language][lessonIndex].quiz[quizIndex].answer;
+            const questionDiv = selectedOption.parentElement.parentElement;
+
+            if (selectedOption && selectedOption.value === correctAnswer) {
+                questionDiv.classList.add("correct");
+                new Audio('correct.wav').play();
+                score++;
+            } else {
+                questionDiv.classList.add("incorrect");
+                new Audio('incorrect.wav').play();
+            }
+            if (score === totalQuestions){
+                showScore();
+            }
+        }
+        function showScore(){
+            document.getElementById("final-score").innerText = `${score} / ${totalQuestions}`;
+            document.getElementById("score-container").style.display = "block";
+            let nextSteps = "";
+
+            if (score === totalQuestions){
+                nextSteps = "Great job! You've mastered the basics. Move on to the next lesson or try a different language!";
+            }
+            else if (score >= totalQuestions / 2) {
+                nextSteps = "Not bad! Review the questions you missed and try again, or continue practicing.";
+            } else {
+                nextSteps = "Keep practicing! Review the lessons and try again. You'll get there!";
+            }
+            document.getElementById("next-steps").innerText = nextSteps;
+        }
+
+        function runCode(codeId, outputId) {
+            const code = document.getElementById(codeId).value;
+            try {
+                const result = eval(code);
+                document.getElementById(outputId).innerText = result === undefined ? '' : String(result);
+            } catch (error) {
+                document.getElementById(outputId).innerText = 'Error: ' + error;
+            }
+        }
+
+        function runPythonCode(codeId, outputId) {
+            const code = document.getElementById(codeId).value;
+            // In a real application, you would send this code to a server to be executed by a Python interpreter.
+            // For this client-side example, we'll just simulate some output.
+            document.getElementById(outputId).innerText = "Running Python code...\n(Simulated output)";
+            console.log("Simulated Python execution:", code);
+        }
+
+        function runHtmlCode(codeId, outputId) {
+            const html = document.getElementById(codeId).value;
+            document.getElementById(outputId).innerHTML = html;
+        }
+
+        function runCSSCode(codeId,outputId){
+            const css = document.getElementById(codeId).value;
+            const styleElement = document.createElement('style');
+            styleElement.textContent = css;
+            const outputArea = document.getElementById(outputId);
+            outputArea.innerHTML = ''; // Clear previous content
+            outputArea.appendChild(styleElement);
+        }
+        loadLessons();
+    </script>
+    <audio id="correctSound" src="correct.wav"></audio>
+    <audio id="incorrectSound" src="incorrect.wav"></audio>
+    <audio id="hintSound" src="hint.wav"></audio>
+</body>
+</html>
